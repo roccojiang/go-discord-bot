@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	gt "github.com/bas24/googletranslatefree"
 	d "github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	parse "github.com/mattn/go-shellwords"
@@ -19,7 +18,7 @@ var (
 	twitterAccount string
 )
 
-// Load .env file and token variable
+// Load .env file and variables
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -88,13 +87,7 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 				s.ChannelMessageSend(m.ChannelID, "Invalid input for !translate. Check !help for an overview.")
 				return
 			}
-
-			text := input[1]
-			in_lang := input[2]
-			out_lang := input[3]
-
-			translated, _ := gt.Translate(text, in_lang, out_lang)
-			s.ChannelMessageSend(m.ChannelID, translated)
+			s.ChannelMessageSend(m.ChannelID, createTranslateMessage(input[1], input[2], input[3]))
 
 		// Random xkcd comic
 		case "!xkcd":
@@ -118,8 +111,7 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 
 		// Tweet command
 		case "!tweet":
-			embed := createTweetEmbed(twitterAccount)
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
 
 		// Help command
 		case "!help":
