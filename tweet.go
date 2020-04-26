@@ -10,6 +10,8 @@ import (
 	t "github.com/n0madic/twitter-scraper"
 )
 
+// Number of pages to look back through (20 tweets per page)
+// The higher the number, the slower responses become
 const pages = 5
 
 func init() {
@@ -17,11 +19,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// getTweet returns a Tweet object from the twitter-scraper library
 func getTweet(account string) *t.Result {
+	// Choose a random tweet from within the page limit
 	var chosenTweet *t.Result
 	limit := rand.Intn(pages * 20)
 
 	count := 0
+	// Iterate over each tweet from the channel
 	for tweet := range t.GetTweets(account, pages) {
 		if tweet.Error != nil {
 			panic(tweet.Error)
@@ -37,6 +42,7 @@ func getTweet(account string) *t.Result {
 	return chosenTweet
 }
 
+// getFormattedTweet formats useful data from Tweet objects into separate variables
 func getFormattedTweet(account string) (text, url, photo, timestamp string, retweets, likes int) {
 	tweet := getTweet(account)
 	text = tweet.Text
@@ -82,6 +88,7 @@ func getFormattedTweet(account string) (text, url, photo, timestamp string, retw
 	return text, url, photo, timestamp, tweet.Retweets, tweet.Likes
 }
 
+// getFormattedProfile formats useful data from Profile objects from the twitter-scraper library
 func getFormattedProfile(account string) (name, avatar string) {
 	profile, err := t.GetProfile(account)
 	if err != nil {
@@ -91,6 +98,7 @@ func getFormattedProfile(account string) (name, avatar string) {
 	return profile.Name, profile.Avatar
 }
 
+// createTweetEmbed creates a pointer to a Discord MessageEmbed object with the tweet data
 func createTweetEmbed(account string) *d.MessageEmbed {
 	tweet, url, photo, timestamp, retweets, likes := getFormattedTweet(account)
 	profileName, profilePhoto := getFormattedProfile(account)
@@ -105,7 +113,7 @@ func createTweetEmbed(account string) *d.MessageEmbed {
 		Description: tweet,
 		Image:       &d.MessageEmbedImage{URL: photo},
 		Footer: &d.MessageEmbedFooter{
-			Text:    fmt.Sprintf("%d Retweets  %d Likes", retweets, likes),
+			Text:    fmt.Sprintf("%d Retweets | %d Likes", retweets, likes),
 			IconURL: "https://cdn2.iconfinder.com/data/icons/minimalism/512/twitter.png",
 		},
 		Timestamp: timestamp,
