@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	gt "github.com/bas24/googletranslatefree"
 )
@@ -10,7 +10,7 @@ import (
 func createTranslateMessage(text, inLang, outLang string) (translated string) {
 	translated, err := gt.Translate(text, inLang, outLang)
 	if err != nil {
-		fmt.Println("Error translating,", err)
+		log.Println("Error translating,", err)
 	}
 
 	return
