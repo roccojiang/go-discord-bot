@@ -2,6 +2,9 @@
 # Created by https://www.gitignore.io/api/go,macos,dotenv
 # Edit at https://www.gitignore.io/?templates=go,macos,dotenv
 
+### Compiled executable ###
+main
+
 ### dotenv ###
 .env
 
