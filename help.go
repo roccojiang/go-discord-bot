@@ -28,8 +28,8 @@ func createHelpEmbed(s *d.Session) *d.MessageEmbed {
 				Value: "Uses Google Translate. Keep text in quotations, and use two-letter language codes.",
 			},
 			&d.MessageEmbedField{
-				Name:  "!xkcd",
-				Value: "Shows a random xkcd comic.",
+				Name:  "!xkcd [num]",
+				Value: "Shows an xkcd comic. If the comic number is not provided, a random one will be chosen.",
 			},
 		},
 	}

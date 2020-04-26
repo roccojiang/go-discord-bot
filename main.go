@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	d "github.com/bwmarrin/discordgo"
@@ -32,7 +33,7 @@ func main() {
 	// Create a new Discord session using the provided bot token
 	dg, err := d.New("Bot " + botToken)
 	if err != nil {
-		fmt.Println("Error creating Discord session,", err)
+		log.Println("Error creating Discord session,", err)
 		return
 	}
 
@@ -42,7 +43,7 @@ func main() {
 	// Open a websocket connection to Discord and begin listening
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("Error opening connection,", err)
+		log.Println("Error opening connection,", err)
 		return
 	}
 
@@ -68,10 +69,11 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 	// Parse commands
 	input, err := p.Parse(m.Content)
 	if err != nil {
-		fmt.Println("Error parsing input,", err)
+		log.Println("Error parsing input,", err)
 		return
 	}
 
+	// Commands
 	if len(input) > 0 {
 		command := input[0]
 		switch command {
@@ -79,12 +81,12 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 		case "!ping":
 			s.ChannelMessageSend(m.ChannelID, "I'm alive... *sadly*...")
 
-		// Tweet command
+		// Get tweet from specified Twitter account
 		case "!tweet":
 			s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
 
 		// Google Translate
-		// Mostly for Andrei's weird German text
+		// Mostly for Andrei's weird German stuff
 		case "!translate":
 			if len(input) != 4 {
 				s.ChannelMessageSend(m.ChannelID, "Invalid input for !translate. Check !help for an overview.")
@@ -92,9 +94,21 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 			}
 			s.ChannelMessageSend(m.ChannelID, createTranslateMessage(input[1], input[2], input[3]))
 
-		// Random xkcd comic
+		// Get xkcd comic
 		case "!xkcd":
-			s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed())
+			if len(input) == 1 {
+				s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed(getRandomComic()))
+			} else if len(input) == 2 {
+				comicNum, err := strconv.Atoi(input[1])
+				if err != nil {
+					s.ChannelMessageSend(m.ChannelID, "Invalid input for !xkcd. Check !help for an overview.")
+					return
+				}
+				s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed(getComic(comicNum)))
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "Invalid input for !xkcd. Check !help for an overview.")
+				return
+			}
 
 		// Help command
 		case "!help":

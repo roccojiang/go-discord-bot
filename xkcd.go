@@ -2,18 +2,42 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	d "github.com/bwmarrin/discordgo"
 	xkcd "github.com/nishanths/go-xkcd"
 )
 
-// createComicEmbed creates a pointer to a Discord MessageEmbed object with a random xkcd comic
-func createComicEmbed() *d.MessageEmbed {
-	// Create xkcd client and get random comic
+// getComic retrieves an xkcd comic with specified number
+func getComic(comicNum int) xkcd.Comic {
+	// Create xkcd client
 	xkcdClient := xkcd.NewClient()
-	comic, _ := xkcdClient.Random()
 
-	// Create embed
+	// Get comic
+	comic, err := xkcdClient.Get(comicNum)
+	if err != nil {
+		log.Println("Error getting xkcd comic,", err)
+	}
+
+	return comic
+}
+
+// getRandomComic retrieves a random xkcd comic
+func getRandomComic() xkcd.Comic {
+	// Create xkcd client
+	xkcdClient := xkcd.NewClient()
+
+	// Get random comic
+	comic, err := xkcdClient.Random()
+	if err != nil {
+		log.Println("Error getting xkcd comic,", err)
+	}
+
+	return comic
+}
+
+// createComicEmbed creates a pointer to a Discord MessageEmbed object with a formatted xkcd comic
+func createComicEmbed(comic xkcd.Comic) *d.MessageEmbed {
 	embed := &d.MessageEmbed{
 		Author: &d.MessageEmbedAuthor{
 			Name:    "xkcd",
