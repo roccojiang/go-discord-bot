@@ -1,3 +1,3 @@
 # Discord Bot
 
-A Discord bot built using Go. Hosted on [repl.it](https://repl.it).
+A useless Discord bot built using Go.
