@@ -9,8 +9,7 @@ import (
 
 	d "github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	parse "github.com/mattn/go-shellwords"
-	xkcd "github.com/nishanths/go-xkcd"
+	p "github.com/mattn/go-shellwords"
 )
 
 var (
@@ -67,7 +66,7 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 	}
 
 	// Parse commands
-	input, err := parse.Parse(m.Content)
+	input, err := p.Parse(m.Content)
 	if err != nil {
 		fmt.Println("Error parsing input,", err)
 		return
@@ -78,7 +77,11 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 		switch command {
 		// Ping
 		case "!ping":
-			s.ChannelMessageSend(m.ChannelID, "Pong")
+			s.ChannelMessageSend(m.ChannelID, "I'm alive... *sadly*...")
+
+		// Tweet command
+		case "!tweet":
+			s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
 
 		// Google Translate
 		// Mostly for Andrei's weird German text
@@ -91,60 +94,11 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 
 		// Random xkcd comic
 		case "!xkcd":
-			// Create xkcd client and get random comic
-			xkcdClient := xkcd.NewClient()
-			comic, _ := xkcdClient.Random()
-
-			// Create embed
-			embed := &d.MessageEmbed{
-				Author: &d.MessageEmbedAuthor{
-					Name:    "xkcd",
-					URL:     "https://xkcd.com",
-					IconURL: "https://is2-ssl.mzstatic.com/image/thumb/Purple123/v4/b5/f6/a2/b5f6a20c-5e4e-fb72-2592-2841784bc48c/AppIcon-0-0-1x_U007emarketing-0-0-0-5-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.jpeg/320x0w.jpg",
-				},
-				Color: 0x96aac8,
-				URL:   fmt.Sprintf("https://xkcd.com/%d", comic.Number),
-				Title: fmt.Sprintf("#%d - %s", comic.Number, comic.Title),
-				Image: &d.MessageEmbedImage{URL: comic.ImageURL},
-			}
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
-
-		// Tweet command
-		case "!tweet":
-			s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
+			s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed())
 
 		// Help command
 		case "!help":
-			embed := &d.MessageEmbed{
-				Author: &d.MessageEmbedAuthor{
-					Name:    s.State.User.Username,
-					IconURL: s.State.User.AvatarURL(""),
-				},
-				Title: "Commands",
-				Fields: []*d.MessageEmbedField{
-					&d.MessageEmbedField{
-						Name:  "!help",
-						Value: "Invokes this help box... but it's obvious you know that already.",
-					},
-					&d.MessageEmbedField{
-						Name:  "!ping",
-						Value: "Check if the bot is alive.",
-					},
-					&d.MessageEmbedField{
-						Name:  "!translate [text] [input lang] [output lang]",
-						Value: "Uses Google Translate. Keep text in quotations, and use two-letter language codes.",
-					},
-					&d.MessageEmbedField{
-						Name:  "!xkcd",
-						Value: "Shows a random xkcd comic.",
-					},
-					&d.MessageEmbedField{
-						Name:  "!tweet",
-						Value: "Shows a random tweet from our favourite news source.",
-					},
-				},
-			}
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			s.ChannelMessageSendEmbed(m.ChannelID, createHelpEmbed(s))
 		}
 	}
 }
