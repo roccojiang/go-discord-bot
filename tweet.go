@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"regexp"
 	"time"
@@ -92,7 +93,7 @@ func getFormattedTweet(account string) (text, url, photo, timestamp string, retw
 func getFormattedProfile(account string) (name, avatar string) {
 	profile, err := t.GetProfile(account)
 	if err != nil {
-		panic(err)
+		log.Println("Error getting profile,", err)
 	}
 
 	return profile.Name, profile.Avatar

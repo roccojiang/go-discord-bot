@@ -20,8 +20,8 @@ func createHelpEmbed(s *d.Session) *d.MessageEmbed {
 				Value: "Check if the bot is alive.",
 			},
 			&d.MessageEmbedField{
-				Name:  "!tweet",
-				Value: "Shows a random tweet from our favourite news source.",
+				Name:  "!tweet [account]",
+				Value: "Shows a random tweet from our favourite Twitter account! Provide an account name to get a tweet from a different account (VERY EXPERIMENTAL, most likely will cause the bot to die).",
 			},
 			&d.MessageEmbedField{
 				Name:  "!translate [text] [input lang] [output lang]",

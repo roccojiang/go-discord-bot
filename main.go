@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	d "github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -48,7 +49,7 @@ func main() {
 	}
 
 	// Wait here until CTRL-C or other term signal is received
-	fmt.Println("Bot is now running. Press CTRL-C to exit.")
+	fmt.Printf("Bot is running since %s. Press CTRL-C to exit.\n", time.Now().Format(time.ANSIC))
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -76,36 +77,53 @@ func messageCreate(s *d.Session, m *d.MessageCreate) {
 	// Commands
 	if len(input) > 0 {
 		command := input[0]
+		commandNum := len(input)
 		switch command {
 		// Ping
 		case "!ping":
 			s.ChannelMessageSend(m.ChannelID, "I'm alive... *sadly*...")
 
-		// Get tweet from specified Twitter account
+		// Get tweet from Twitter
 		case "!tweet":
-			s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
+			switch commandNum {
+			// Default Twitter account
+			case 1:
+				s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(twitterAccount))
+			// Custom specified Twitter account
+			case 2:
+				customTwitterAccount := input[1]
+				s.ChannelMessageSendEmbed(m.ChannelID, createTweetEmbed(customTwitterAccount))
+			default:
+				s.ChannelMessageSend(m.ChannelID, "Invalid input for !tweet. Check !help for an overview.")
+				return
+			}
 
 		// Google Translate
 		// Mostly for Andrei's weird German stuff
 		case "!translate":
-			if len(input) != 4 {
+			switch commandNum {
+			case 4:
+				s.ChannelMessageSend(m.ChannelID, createTranslateMessage(input[1], input[2], input[3]))
+			default:
 				s.ChannelMessageSend(m.ChannelID, "Invalid input for !translate. Check !help for an overview.")
 				return
 			}
-			s.ChannelMessageSend(m.ChannelID, createTranslateMessage(input[1], input[2], input[3]))
 
 		// Get xkcd comic
 		case "!xkcd":
-			if len(input) == 1 {
+			switch commandNum {
+			// Random comic
+			case 1:
 				s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed(getRandomComic()))
-			} else if len(input) == 2 {
+			// Specified comic number
+			case 2:
 				comicNum, err := strconv.Atoi(input[1])
 				if err != nil {
 					s.ChannelMessageSend(m.ChannelID, "Invalid input for !xkcd. Check !help for an overview.")
 					return
 				}
 				s.ChannelMessageSendEmbed(m.ChannelID, createComicEmbed(getComic(comicNum)))
-			} else {
+			default:
 				s.ChannelMessageSend(m.ChannelID, "Invalid input for !xkcd. Check !help for an overview.")
 				return
 			}
